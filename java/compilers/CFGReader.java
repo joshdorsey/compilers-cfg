@@ -26,7 +26,7 @@ public class CFGReader {
                 LinkedList<Symbol> currentRule = new LinkedList<>();
 
                 int i = 1;
-                if (symbols[0].type == Symbol.SymbolType.NONTERMINAL) {
+                if (symbols[0].type == SymbolType.NONTERMINAL) {
                     currentProd = symbols[0];
                     i = 2;
                 }
@@ -62,6 +62,10 @@ public class CFGReader {
 
         grammar.productions().forEach(rule ->
             System.out.println(rule.getLeft() + "->" + rule.getRight())
+        );
+
+        grammar.nonterminals().forEach(nonterminal ->
+            System.out.println("derivesToLambda(" + nonterminal + ") = " + grammar.derivesToLambda(nonterminal))
         );
     }
 }

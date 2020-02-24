@@ -1,7 +1,12 @@
 package compilers;
 
+import java.util.Objects;
+
+enum SymbolType { NONTERMINAL, TERMINAL, RULE, ALT, EOF, LAMBDA }
+
 class Symbol {
-    public enum SymbolType { NONTERMINAL, TERMINAL, RULE, ALT, EOF, LAMBDA }
+    static final Symbol LAMBDA = new Symbol("lambda");
+    static final Symbol EOF = new Symbol("$");
 
     String token;
     SymbolType type;
@@ -9,6 +14,14 @@ class Symbol {
     Symbol(String token) {
         this.token = token;
         type = matchSymbol(token);
+    }
+
+    public boolean isTerminal() {
+        return SymbolType.TERMINAL.equals(type);
+    }
+
+    public boolean isNonTerminal() {
+        return SymbolType.NONTERMINAL.equals(type);
     }
 
     @Override
@@ -29,5 +42,19 @@ class Symbol {
                     return SymbolType.NONTERMINAL;
                 return null;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Symbol symbol = (Symbol) o;
+        return Objects.equals(token, symbol.token) &&
+                type == symbol.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(token, type);
     }
 }
