@@ -71,7 +71,7 @@ class CFG {
 
             // This function makes a recursive call to this function, and guards against recursive loops.
             Predicate<Symbol> recurse = (nt) -> {
-                Tuple<Rule, Symbol> stackItem = new Tuple<>(rule, nt);
+                Tuple<Rule, Symbol> stackItem = Tuple.of(rule, nt);
 
                 // If we've already seen this item, skip it
                 if (recurseStack.contains(stackItem)) {
@@ -130,6 +130,52 @@ class CFG {
 
     Set<Symbol> firstSet(List<Symbol> seq) {
         return firstSet(seq, new HashSet<>());
+    }
+
+    Set<Symbol> followSet(Symbol nt, Set<Symbol> followSet) {
+        if (followSet.contains(nt)) {
+            return followSet;
+        }
+
+        followSet.add(nt);
+        Set<Symbol> updateSet = new HashSet<>();
+
+        // Get the RHSs of production rules that contain nt
+        List<Rule> productions = productions()
+                .filter(rule ->  rule.getRight().contains(nt))
+                .collect(Collectors.toList());
+
+        for (Rule r : productions) {
+            List<Symbol> rhs = r.getRight();
+            Symbol lhs = r.getLeft();
+            for (int i = 0; i < rhs.size(); i++) {
+                // If we're not at an instance of nt, there's nothing to do
+                if (!rhs.get(i).equals(nt)) {
+                    continue;
+                }
+
+                // If we are, consider the sequence of symbols after nt
+                List<Symbol> tail = rhs.subList(i + 1, rhs.size());
+
+                if (!tail.isEmpty()) {
+                    Set<Symbol> firstSet = firstSet(tail);
+                    updateSet.addAll(firstSet);
+                }
+
+                boolean noAugmentedSigma = rhs.stream().noneMatch(Symbol::isAugmentedSigma);
+                boolean allToLambda = rhs.stream().allMatch(this::derivesToLambda);
+                if (tail.isEmpty() || (noAugmentedSigma && allToLambda)) {
+                    Set<Symbol> follow = followSet(lhs, followSet);
+                    updateSet.addAll(follow);
+                }
+            }
+        }
+
+        return updateSet;
+    }
+
+    Set<Symbol> followSet(Symbol nt) {
+        return followSet(nt, new HashSet<>());
     }
     //</editor-fold>
 

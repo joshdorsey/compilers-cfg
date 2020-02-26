@@ -84,5 +84,12 @@ public class CFGReader {
             System.out.print("firstSet(" + rhs + ") = ");
             System.out.println(grammar.firstSet(rhs));
         });
+
+        System.out.println("\nfollowSet Tests:");
+        System.out.println("================");
+        grammar.nonterminals().forEach(nonterminal -> {
+            System.out.print("followSet(" + nonterminal + ") = ");
+            System.out.println(grammar.followSet(nonterminal));
+        });
     }
 }
