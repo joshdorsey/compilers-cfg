@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     string action = argv[2];
 
     // generate CFG from file
-    CFG grammar("grammars/" + filename);
+    CFG grammar("../" + filename);
 
     // take given action
     if (action == "--print") grammar.printMap();
