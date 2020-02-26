@@ -162,8 +162,8 @@ class CFG {
                     updateSet.addAll(firstSet);
                 }
 
-                boolean noAugmentedSigma = rhs.stream().noneMatch(Symbol::isAugmentedSigma);
-                boolean allToLambda = rhs.stream().allMatch(this::derivesToLambda);
+                boolean noAugmentedSigma = tail.stream().noneMatch(Symbol::isAugmentedSigma);
+                boolean allToLambda = tail.stream().allMatch(this::derivesToLambda);
                 if (tail.isEmpty() || (noAugmentedSigma && allToLambda)) {
                     Set<Symbol> follow = followSet(lhs, followSet);
                     updateSet.addAll(follow);
