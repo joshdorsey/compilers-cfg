@@ -2,6 +2,7 @@ package compilers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Scanner;
 import java.util.LinkedList;
 
@@ -60,12 +61,28 @@ public class CFGReader {
 
         CFG grammar = readGrammar(new File(args[0]));
 
+        System.out.println("Grammar Rules:");
+        System.out.println("==============");
         grammar.productions().forEach(rule ->
-            System.out.println(rule.getLeft() + "->" + rule.getRight())
+                System.out.println(rule.getLeft() + " -> " + rule.getRight())
         );
 
-        grammar.nonterminals().forEach(nonterminal ->
-            System.out.println("derivesToLambda(" + nonterminal + ") = " + grammar.derivesToLambda(nonterminal))
-        );
+        System.out.println("\nderivesToLambda Tests:");
+        System.out.println("======================");
+        grammar.nonterminals().forEach(nonterminal -> {
+            System.out.print("derivesToLambda(" + nonterminal + ") = ");
+            System.out.println(grammar.derivesToLambda(nonterminal));
+        });
+
+        System.out.println("\nfirstSet Tests:");
+        System.out.println("===============");
+        grammar.nonterminals().forEach(nonterminal -> {
+            System.out.print("firstSet(" + nonterminal + ") = ");
+            System.out.println(grammar.firstSet(List.of(nonterminal)));
+        });
+        grammar.productions().map(CFG.Rule::getRight).forEach(rhs -> {
+            System.out.print("firstSet(" + rhs + ") = ");
+            System.out.println(grammar.firstSet(rhs));
+        });
     }
 }

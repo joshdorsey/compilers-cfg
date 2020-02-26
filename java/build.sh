@@ -30,7 +30,6 @@ Main-Class: compilers.CFGReader
 Class-Path: lib/commons-collections4-4.4.jar
 EOF
 
-
 jar cvfm ../CFGReader.jar MANIFEST.MF compilers/* ../lib/*
 popd
 

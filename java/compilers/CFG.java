@@ -21,7 +21,7 @@ class CFG {
                 .map(e -> new Rule(e.getKey(), e.getValue()));
     }
 
-    Stream<Rule> productionsFor(Symbol lhs) {
+    Stream<Rule> productions(Symbol lhs) {
         return productions().filter(rule -> rule.getLeft().equals(lhs));
     }
 
@@ -43,8 +43,8 @@ class CFG {
         return productions().collect(Collectors.toList());
     }
 
-    List<Rule> getProductionsFor(Symbol lhs) {
-        return productionsFor(lhs).collect(Collectors.toList());
+    List<Rule> getProductions(Symbol lhs) {
+        return productions(lhs).collect(Collectors.toList());
     }
 
     Set<Symbol> getTerminals() {
@@ -58,7 +58,7 @@ class CFG {
 
     //<editor-fold desc="Algorithms">
     boolean derivesToLambda(Symbol s, Stack<Tuple<Rule, Symbol>> recurseStack) {
-        for (Rule rule : getProductionsFor(s)) {
+        for (Rule rule : getProductions(s)) {
             // If this rule contains only lambda, we can short-circuit
             if (rule.isLambda()) {
                 return true;
@@ -98,6 +98,38 @@ class CFG {
 
     boolean derivesToLambda(Symbol s) {
         return derivesToLambda(s, new Stack<>());
+    }
+
+    Set<Symbol> firstSet(List<Symbol> seq, Set<Symbol> firstSet) {
+        if (seq.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        Symbol firstSymbol = seq.get(0);
+        List<Symbol> rest = seq.subList(1, seq.size());
+
+        if (Symbol.EOF.equals(firstSymbol) || getTerminals().contains(firstSymbol)) {
+            return new HashSet<>(Collections.singletonList(firstSymbol));
+        }
+
+        Set<Symbol> updateSet = new HashSet<>();
+
+        if (!firstSet.contains(firstSymbol)) {
+            firstSet.add(firstSymbol);
+            for (Rule rule : getProductions(firstSymbol)) {
+                updateSet.addAll(firstSet(rule.getRight(), firstSet));
+            }
+        }
+
+        if (derivesToLambda(firstSymbol)) {
+            updateSet.addAll(firstSet(rest, firstSet));
+        }
+
+        return updateSet;
+    }
+
+    Set<Symbol> firstSet(List<Symbol> seq) {
+        return firstSet(seq, new HashSet<>());
     }
     //</editor-fold>
 
