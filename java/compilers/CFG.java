@@ -57,7 +57,7 @@ class CFG {
     //</editor-fold>
 
     //<editor-fold desc="Algorithms">
-    boolean derivesToLambda(Symbol s, Stack<Tuple<Rule, Symbol>> recurseStack) {
+    boolean derivesToLambda(Symbol s, ArrayDeque<Tuple<Rule, Symbol>> recurseStack) {
         for (Rule rule : getProductions(s)) {
             // If this rule contains only lambda, we can short-circuit
             if (rule.isLambda()) {
@@ -97,7 +97,7 @@ class CFG {
     }
 
     boolean derivesToLambda(Symbol s) {
-        return derivesToLambda(s, new Stack<>());
+        return derivesToLambda(s, new ArrayDeque<>());
     }
 
     Set<Symbol> firstSet(List<Symbol> seq, Set<Symbol> firstSet) {
