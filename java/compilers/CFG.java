@@ -190,19 +190,16 @@ class CFG {
     }
 
     boolean predictSetsDisjoint() {
-        List<Rule> productions = getProductions();
+        for (Symbol nt : getNonTerminals()) {
+            List<Rule> productions = getProductions(nt);
+            for (int i = 0; i < productions.size(); i++) {
+                for (int j = i + 1; j < productions.size(); j++) {
+                    Rule a = productions.get(i);
+                    Rule b = productions.get(j);
 
-        if (productions.size() <= 1) {
-            return true;
-        }
-
-        for (int i = 0; i < productions.size(); i++) {
-            for (int j = i + 1; j < productions.size(); j++) {
-                Rule a = productions.get(i);
-                Rule b = productions.get(j);
-
-                if (!Collections.disjoint(predictSet(a), predictSet(b))) {
-                    return false;
+                    if (!Collections.disjoint(predictSet(a), predictSet(b))) {
+                        return false;
+                    }
                 }
             }
         }
@@ -226,8 +223,7 @@ class CFG {
                 parseTable.put(Tuple.of(predictSets.get(i).getFirst().getLeft(), s), i + 1);
             }
         }
-        ArrayList<Symbol> terms = new ArrayList<Symbol>();
-        this.terminals().forEach(term -> terms.add(term));
+        ArrayList<Symbol> terms = new ArrayList<>(getTerminals());
         System.out.print("\t");
         for(Symbol s : terms) {
             System.out.print(s + "\t");
