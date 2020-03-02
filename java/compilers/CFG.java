@@ -4,6 +4,7 @@ import compilers.util.Tuple;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -142,7 +143,7 @@ class CFG {
 
         // Get the RHSs of production rules that contain nt
         List<Rule> productions = productions()
-                .filter(rule ->  rule.getRight().contains(nt))
+                .filter(rule -> rule.getRight().contains(nt))
                 .collect(Collectors.toList());
 
         for (Rule r : productions) {
@@ -181,11 +182,32 @@ class CFG {
     Set<Symbol> predictSet(Rule r) {
         Set<Symbol> answer = firstSet(r.getRight());
 
-        if(derivesToLambda(r.getLeft())) {
+        if (derivesToLambda(r.getLeft())) {
             answer.addAll(followSet(r.getLeft()));
         }
 
         return answer;
+    }
+
+    boolean predictSetsDisjoint() {
+        List<Rule> productions = getProductions();
+
+        if (productions.size() <= 1) {
+            return true;
+        }
+
+        for (int i = 0; i < productions.size(); i++) {
+            for (int j = i + 1; j < productions.size(); j++) {
+                Rule a = productions.get(i);
+                Rule b = productions.get(j);
+
+                if (!Collections.disjoint(predictSet(a), predictSet(b))) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
     //</editor-fold>
 
