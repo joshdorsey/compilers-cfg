@@ -91,5 +91,12 @@ public class CFGReader {
             System.out.print("followSet(" + nonterminal + ") = ");
             System.out.println(grammar.followSet(nonterminal));
         });
+
+        System.out.println("\npredictSet Tests:");
+        System.out.println("=================");
+        grammar.productions().forEach(rule -> {
+            System.out.print("predictSet(" + rule + ") = ");
+            System.out.println(grammar.predictSet(rule));
+        });
     }
 }

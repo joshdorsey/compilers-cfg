@@ -177,6 +177,16 @@ class CFG {
     Set<Symbol> followSet(Symbol nt) {
         return followSet(nt, new HashSet<>());
     }
+
+    Set<Symbol> predictSet(Rule r) {
+        Set<Symbol> answer = firstSet(r.getRight());
+
+        if(derivesToLambda(r.getLeft())) {
+            answer.addAll(followSet(r.getLeft()));
+        }
+
+        return answer;
+    }
     //</editor-fold>
 
     static class Rule {
@@ -216,6 +226,11 @@ class CFG {
 
         boolean isEnd() {
             return right.contains(Symbol.EOF);
+        }
+
+        @Override
+        public String toString() {
+            return left + "->" + right;
         }
 
         @Override
