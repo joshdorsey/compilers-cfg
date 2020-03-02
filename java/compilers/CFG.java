@@ -134,7 +134,7 @@ class CFG {
 
     Set<Symbol> followSet(Symbol nt, Set<Symbol> followSet) {
         if (followSet.contains(nt)) {
-            return followSet;
+            return new HashSet<>();
         }
 
         followSet.add(nt);
