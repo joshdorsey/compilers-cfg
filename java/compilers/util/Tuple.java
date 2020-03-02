@@ -6,7 +6,11 @@ public class Tuple<S, T> {
     private final S first;
     private final T second;
 
-    public Tuple(S a, T b) {
+    public static <U, V>  Tuple<U, V> of(U a, V b) {
+        return new Tuple<U, V>(a, b);
+    }
+
+    private Tuple(S a, T b) {
         this.first = a;
         this.second = b;
     }

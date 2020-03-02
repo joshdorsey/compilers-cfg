@@ -24,6 +24,10 @@ class Symbol {
         return SymbolType.NONTERMINAL.equals(type);
     }
 
+    public boolean isAugmentedSigma() {
+        return equals(EOF) || isTerminal();
+    }
+
     @Override
     public String toString() {
         return token;

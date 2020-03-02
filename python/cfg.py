@@ -17,7 +17,7 @@ def is_terminal(sym: str) -> bool:
 
 def is_nonterminal(sym: str) -> bool:
     """ Used to check if a symbol is a valid nonterminal. """
-    return sym.isupper()
+    return not is_terminal(sym)
 
 
 def is_end(rule: List[str]) -> bool:
