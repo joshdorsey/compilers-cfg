@@ -101,5 +101,7 @@ public class CFGReader {
 
         System.out.print("\nPredict sets disjoint? ");
         System.out.println(grammar.predictSetsDisjoint() ? "Yes." : "No.");
+
+        grammar.buildLLParseTable();
     }
 }

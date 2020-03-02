@@ -211,6 +211,43 @@ class CFG {
     }
     //</editor-fold>
 
+    HashMap<Tuple<Symbol, Symbol>, Integer> buildLLParseTable() {
+        // if(!this.predictSetsDisjoint()) {
+        //     System.out.println("Predict sets are not disjoint, cannot construct LL(1) parse table!");
+        //     return new HashMap<Tuple<Symbol, Symbol>, Integer>();
+        // }
+        ArrayList<Tuple<Rule, Set<Symbol>>> predictSets = new ArrayList<Tuple<Rule, Set<Symbol>>>();
+        this.productions().forEach(rule -> {
+            predictSets.add(Tuple.of(rule, this.predictSet(rule)));
+        });
+        HashMap<Tuple<Symbol, Symbol>, Integer> parseTable = new HashMap<Tuple<Symbol, Symbol>, Integer>();
+        for(int i = 0; i < predictSets.size(); ++i) {
+            for(Symbol s : predictSets.get(i).getSecond()) {
+                parseTable.put(Tuple.of(predictSets.get(i).getFirst().getLeft(), s), i + 1);
+            }
+        }
+        ArrayList<Symbol> terms = new ArrayList<Symbol>();
+        this.terminals().forEach(term -> terms.add(term));
+        System.out.print("\t");
+        for(Symbol s : terms) {
+            System.out.print(s + "\t");
+        }
+        System.out.println();
+        for(Symbol nonterm : this.getNonTerminals()) {
+            System.out.print(nonterm + " | \t");
+            for(Symbol term : terms) {
+                Integer val = parseTable.get(Tuple.of(nonterm, term));
+                if(val != null) {
+                    System.out.print(val + " | \t");
+                } else {
+                    System.out.print("# | \t");
+                }
+            }
+            System.out.println();
+        }
+        return parseTable;
+    }
+
     static class Rule {
         private Symbol left;
         private List<Symbol> right;
