@@ -215,13 +215,15 @@ class ContextFreeGrammar:
 
     def predict_sets_disjoint(self) -> bool:
         from itertools import combinations
-        for pair in combinations(self.all_rules(), 2):
-            first, second = pair
-            first = self.predict_set(first)
-            second = self.predict_set(second)
 
-            if not first.isdisjoint(second):
-                return False
+        for nt in self.nonterminals:
+            for pair in combinations(self.all_rules(LHS=nt), 2):
+                first, second = pair
+                first = self.predict_set(first)
+                second = self.predict_set(second)
+
+                if not first.isdisjoint(second):
+                    return False
         
         return True
 

@@ -60,7 +60,7 @@ def cfg_from_file(filename: str) -> ContextFreeGrammar:
 
 if "__main__" == __name__:
     args = argv[1:]
-    file = "../grammars/predict-set-test0.cfg" if len(args) < 1 else args[0]
+    file = "../grammars/predict-set-test1.cfg" if len(args) < 1 else args[0]
 
     try:
         cfg = cfg_from_file(file)
@@ -86,3 +86,5 @@ if "__main__" == __name__:
     print("\npredict_set tests")
     for rule in cfg.all_rules():
         print(f"predict_set('{rule}') = {cfg.predict_set(rule)}")
+
+    print(f"\npredict_sets_disjoint: {cfg.predict_sets_disjoint()}")
