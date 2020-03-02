@@ -146,9 +146,9 @@ class CFG {
                 .filter(rule -> rule.getRight().contains(nt))
                 .collect(Collectors.toList());
 
-        for (Rule r : productions) {
-            List<Symbol> rhs = r.getRight();
-            Symbol lhs = r.getLeft();
+        for (Rule rule : productions) {
+            List<Symbol> rhs = rule.getRight();
+            Symbol lhs = rule.getLeft();
             for (int i = 0; i < rhs.size(); i++) {
                 // If we're not at an instance of nt, there's nothing to do
                 if (!rhs.get(i).equals(nt)) {
