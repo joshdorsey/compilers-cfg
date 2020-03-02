@@ -60,7 +60,7 @@ def cfg_from_file(filename: str) -> ContextFreeGrammar:
 
 if "__main__" == __name__:
     args = argv[1:]
-    file = "../grammars/assignlist.cfg" if len(args) < 1 else args[0]
+    file = "../grammars/predict-set-test0.cfg" if len(args) < 1 else args[0]
 
     try:
         cfg = cfg_from_file(file)

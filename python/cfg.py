@@ -65,7 +65,7 @@ class ContextFreeGrammar:
             goal = True
 
         if goal:
-            if not self.goal:
+            if self.goal == 'S':
                 self.goal = LHS
             assert self.goal == LHS, (
                 "Rule conflicts with existing goal state")
