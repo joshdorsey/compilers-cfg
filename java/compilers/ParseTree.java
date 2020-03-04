@@ -5,12 +5,15 @@ import java.util.ArrayDeque;
 import java.util.List;
 import java.util.ListIterator;
 
+import compilers.util.Tuple;
+
 class ParseTree {
 	private ParseNode root;
 	static final Symbol MARKER = new Symbol("*");
 	static final Symbol START = new Symbol("S");
 
-	ParseTree(CFG grammar, ParseTable table, Deque<Token> input) throws Exception {
+	ParseTree(CFG grammar, Deque<Symbol> input) throws Exception {
+		HashMap<Tuple<Symbol, Symbol>, CFG.Rule> table = grammar.buildLLParseTable();
 		root = new ParseNode();
 		ParseNode cur = root;
 		ArrayDeque<Symbol> symbols = new ArrayDeque<>();
@@ -18,7 +21,7 @@ class ParseTree {
 		while (!symbols.isEmpty()) {
 			Symbol s = symbols.pop();
 			if (s.isNonTerminal()) {
-				CFG.Rule rule = table.get(s, input.peek());
+				CFG.Rule rule = table.get(Tuple.of(s, input.peek()));
 				if (rule = null)
 					throw new Exception();
 				symbols.push(MARKER);
