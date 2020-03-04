@@ -4,6 +4,7 @@ import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.HashMap;
 
 import compilers.util.Tuple;
 
@@ -22,7 +23,7 @@ class ParseTree {
 			Symbol s = symbols.pop();
 			if (s.isNonTerminal()) {
 				CFG.Rule rule = table.get(Tuple.of(s, input.peek()));
-				if (rule = null)
+				if (rule == null)
 					throw new Exception();
 				symbols.push(MARKER);
 				List<Symbol> rhs = rule.getRight();
@@ -34,7 +35,7 @@ class ParseTree {
 				cur = node;
 			} else if (s.isTerminal() || s == Symbol.EOF || s == Symbol.LAMBDA) {
 				if (s != Symbol.LAMBDA) {
-					if (!s.matchToken(input.peek()))
+					if (!s.equals(input.peek()))
 						throw new Exception();
 					input.pop();
 				}

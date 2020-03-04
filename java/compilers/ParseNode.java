@@ -8,6 +8,12 @@ class ParseNode {
 	private ParseNode parent;
 	private List<ParseNode> children;
 
+	ParseNode() {
+		identifier = new Symbol("");
+		parent = null;
+		children = new LinkedList<>();
+	}
+	
 	ParseNode(Symbol symbol) {
 		identifier = symbol;
 		parent = null;
