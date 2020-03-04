@@ -1,7 +1,5 @@
-#!/usr/bin/env -S python -i
-from typing import Optional, Dict, List, Callable, Final
+from typing import Optional, Dict, List, Callable, Final, Set, Tuple
 from functools import partial
-from sys import argv
 
 
 ARROW: Final[str] = "->"
@@ -67,7 +65,7 @@ class ContextFreeGrammar:
             goal = True
 
         if goal:
-            if not self.goal:
+            if self.goal == 'S':
                 self.goal = LHS
             assert self.goal == LHS, (
                 "Rule conflicts with existing goal state")
@@ -87,13 +85,24 @@ class ContextFreeGrammar:
         self.terminals |= set(filter(is_terminal, allSymbols))
         self.nonterminals |= set(filter(is_nonterminal, allSymbols))
 
-    def all_rules(self, LHS=None):
+    def all_rules(self, LHS=None, RHS=None):
+        if LHS and RHS:
+            raise IndentationError("Yeah, passing LHS and RHS to this function won't work.")
+        
         if LHS:
-            return [(LHS, R) for R in self.rules[LHS]]
+            if self.is_nonterminal(LHS):
+                return [(LHS, R) for R in self.rules[LHS]]
+            else:
+                return []
 
-        return [(L, R) for L in self.nonterminals for R in self.rules[L]]
+        allRules = [(L, R) for L in self.nonterminals for R in self.rules[L]]
+        
+        if RHS:
+            return filter(lambda rule: RHS in rule[1], allRules)
+        else:
+            return allRules
 
-    def derives_to_lambda_impl(self, L, T):
+    def derives_to_lambda_impl(self, L : str, T : List[Tuple[Tuple[str, List[str]], str]]) -> bool:
         for lhs, rhs in self.all_rules(L):
             # If this rule is just lambda, we have derived to lambda
             if rhs == [LAMBDA]:
@@ -129,14 +138,103 @@ class ContextFreeGrammar:
 
         return False
 
-    def derives_to_lambda(self, L):
+    def derives_to_lambda(self, L : str) -> bool:
         return self.derives_to_lambda_impl(L, [])
+
+    def first_set_impl(self, x : List[str], firstSet : Set[str]) -> Set[str]:
+        if len(x) == 0:
+            return set()
+
+        first, rest = x[0], x[1:]
+
+        if first == END or first in self.terminals:
+            return set([first])
+
+        update = set()
+
+        if first not in firstSet:
+            firstSet.add(first)
+            for rule in self.all_rules(LHS=first):
+                newValues = self.first_set_impl(rule[1], firstSet)
+                update.update(newValues)
+
+        if self.derives_to_lambda(first):
+            newValues = self.first_set_impl(rest, firstSet)
+            update.update(newValues)
+
+        return update
+
+    def first_set(self, x : List[str]) -> Set[str]:
+        return self.first_set_impl(x, set())
+
+    def follow_set_impl(self, nt: str, follow: Set[str]) -> Set[str]:
+        if nt in follow:
+            return set()
+
+        follow.add(nt)
+        update = set()
+
+        for rule in self.all_rules(RHS = nt):
+            lhs, rhs = rule
+
+            for pair in enumerate(rhs, start=1):
+                idx, sym = pair
+                if sym != nt:
+                    continue
+
+                tail = rhs[idx:]
+
+                doFollow = False
+
+                if len(tail) != 0:
+                    update.update(self.first_set(tail))
+                else:
+                    doFollow = True
+
+                if doFollow:
+                    update.update(self.follow_set_impl(lhs, follow))
+                else:
+                    anyAugmentedSigma = any(map(self.is_augmented_sigma, tail))
+                    allToLambda = all(map(self.derives_to_lambda, tail))
+                    if not anyAugmentedSigma and allToLambda:
+                        update.update(self.follow_set_impl(lhs, follow))
+
+        return update
+
+    def follow_set(self, nt: str) -> Set[str]:
+        return self.follow_set_impl(nt, set())
+
+    def predict_set(self, rule: Tuple[str, List[str]]) -> Set[str]:
+        lhs, rhs = rule
+        answer = self.first_set(rhs)
+
+        if self.derives_to_lambda(lhs):
+            answer.update(self.follow_set(lhs))
+
+        return answer
+
+    def predict_sets_disjoint(self) -> bool:
+        from itertools import combinations
+
+        for nt in self.nonterminals:
+            for pair in combinations(self.all_rules(LHS=nt), 2):
+                first, second = pair
+                first = self.predict_set(first)
+                second = self.predict_set(second)
+
+                if not first.isdisjoint(second):
+                    return False
+        
+        return True
 
     def is_terminal(self, x):
         return x in self.terminals
 
     def is_nonterminal(self, x):
         return x in self.nonterminals
+
+    def is_augmented_sigma(self, x):
+        return x == END or self.is_terminal(x)
 
     def __str__(self):
         assert set(self.rules.keys()) == self.nonterminals
@@ -170,76 +268,3 @@ class ContextFreeGrammar:
                 f"Nonterminals: {nonTerminals}\n"
                 f"Goal = {self.goal}\n"
                 f"Rules:\n{rules}")
-
-
-def cfg_from_file(filename: str) -> ContextFreeGrammar:
-    """ Reads in the lines of a file and creates a CFG """
-    cfg = ContextFreeGrammar()
-
-    rules = []
-    with open(filename) as file:
-        # It's possible we'll join some lines together as we
-        # read, these variables keep track of that.
-        lastLineStartedRule = False
-        rule = ""
-
-        for line in file:
-            line = line.strip()
-
-            # Ignore empty lines
-            if not line:
-                continue
-
-            # If the line is an alternation, just append
-            if line[0] == ALTERNATION:
-                rule += " " + line
-                lastLineStartedRule = False
-
-            # If it's not an alternation, we may be finishing
-            # up a rule with several alternations
-            elif ARROW in line:
-                if not lastLineStartedRule and rule:
-                    rules += [rule]
-                rule = line
-
-        # We might have been building a rule at the end of the
-        # file and not actually put it in our list (because it
-        # could have had alternations)
-        if rule:
-            rules += [rule]
-
-    for rule in rules:
-        # Split the left and right sides
-        LHS, RHS = rule.split(ARROW)
-
-        # Trim any whitespace on the production name
-        LHS = LHS.strip()
-
-        assert is_nonterminal(LHS), (
-            f"Invalid production rule name {LHS}, "
-            "should be uppercase.")
-
-        # Seperate the right side by alternations, and build a list
-        # of stripped symbols for each one.
-        alternations = RHS.split(ALTERNATION)
-        RHS = [[x.strip() for x in alt.split()] for alt in alternations]
-
-        cfg.add_rule(LHS, RHS)
-
-    return cfg
-
-if "__main__" == __name__:
-    args = argv[1:]
-    file = "grammar.cfg" if len(args) < 1 else args[0]
-
-    try:
-        cfg = cfg_from_file(file)
-    except FileNotFoundError:
-        print(f"Couldn't open file '{file}', "
-              "please pass in a valid filename.")
-        cfg = ContextFreeGrammar(goal="ERROR")
-
-    print(f"{cfg}")
-
-    for nt in cfg.nonterminals:
-        print(f"derivesToLambda('{nt}') = {cfg.derives_to_lambda(nt)}")

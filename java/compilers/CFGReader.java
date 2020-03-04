@@ -18,6 +18,10 @@ public class CFGReader {
             Symbol currentProd = null;
 
             while (in.hasNext()) {
+                String line = in.nextLine();
+                if(line.trim().isBlank()) {
+                    continue;
+                }
                 Symbol[] symbols = stream(in.nextLine().split("\\s+"))
                         .map(Symbol::new)
                         .filter(s -> s.type != null)
