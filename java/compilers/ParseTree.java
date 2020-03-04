@@ -9,7 +9,7 @@ import java.util.HashMap;
 import compilers.util.Tuple;
 
 class ParseTree {
-	private ParseNode root;
+	ParseNode root;
 	static final Symbol MARKER = new Symbol("*");
 	static final Symbol START = new Symbol("S");
 
@@ -24,7 +24,7 @@ class ParseTree {
 			if (s.isNonTerminal()) {
 				CFG.Rule rule = table.get(Tuple.of(s, input.peek()));
 				if (rule == null)
-					throw new Exception();
+					throw new Exception(input.peek() + ": cannot find rule for nonterminal: " + s);
 				symbols.push(MARKER);
 				List<Symbol> rhs = rule.getRight();
 				ListIterator<Symbol> it = rhs.listIterator(rhs.size());
@@ -36,7 +36,7 @@ class ParseTree {
 			} else if (s.isTerminal() || s == Symbol.EOF || s == Symbol.LAMBDA) {
 				if (s != Symbol.LAMBDA) {
 					if (!s.equals(input.peek()))
-						throw new Exception();
+						throw new Exception(input.peek() + ": does not match expected terminal: " + s);
 					input.pop();
 				}
 				cur.addChild(new ParseNode(s));

@@ -54,12 +54,30 @@ public class CFGReader {
     }
 
     public static void main(String... args) {
-        if (args.length != 1) {
-            System.out.println("Please provide one argument: the name of a grammar file.");
+        if (args.length < 1) {
+            System.out.println("usage: CFGReader.jar grammarfile inputfile");
             System.exit(1);
         }
 
         CFG grammar = readGrammar(new File(args[0]));
+
+	if (args.length == 2) {
+		LinkedList<Symbol> lines = new LinkedList<>();
+		try (Scanner in = new Scanner(new File(args[1]))) {
+			while (in.hasNext())
+				lines.add(new Symbol(in.nextLine().trim()));
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getMessage());
+			System.exit(1);
+		}
+		try {
+			ParseTree tree = new ParseTree(grammar, lines);
+			System.out.println(tree.root);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		System.exit(0);
+	}
 
         System.out.println("Grammar Rules:");
         System.out.println("==============");
@@ -102,6 +120,6 @@ public class CFGReader {
         System.out.print("\nPredict sets disjoint? ");
         System.out.println(grammar.predictSetsDisjoint() ? "Yes." : "No.");
 
-        grammar.buildLLParseTable();
+        grammar.printLLParseTable(grammar.buildLLParseTable());
     }
 }
