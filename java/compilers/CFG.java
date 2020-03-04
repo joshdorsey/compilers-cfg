@@ -4,6 +4,7 @@ import compilers.util.Tuple;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -71,7 +72,7 @@ class CFG {
 
             // This function makes a recursive call to this function, and guards against recursive loops.
             Predicate<Symbol> recurse = (nt) -> {
-                Tuple<Rule, Symbol> stackItem = new Tuple<>(rule, nt);
+                Tuple<Rule, Symbol> stackItem = Tuple.of(rule, nt);
 
                 // If we've already seen this item, skip it
                 if (recurseStack.contains(stackItem)) {
@@ -131,7 +132,117 @@ class CFG {
     Set<Symbol> firstSet(List<Symbol> seq) {
         return firstSet(seq, new HashSet<>());
     }
+
+    Set<Symbol> followSet(Symbol nt, Set<Symbol> followSet) {
+        if (followSet.contains(nt)) {
+            return new HashSet<>();
+        }
+
+        followSet.add(nt);
+        Set<Symbol> updateSet = new HashSet<>();
+
+        // Get the RHSs of production rules that contain nt
+        List<Rule> productions = productions()
+                .filter(rule -> rule.getRight().contains(nt))
+                .collect(Collectors.toList());
+
+        for (Rule rule : productions) {
+            List<Symbol> rhs = rule.getRight();
+            Symbol lhs = rule.getLeft();
+            for (int i = 0; i < rhs.size(); i++) {
+                // If we're not at an instance of nt, there's nothing to do
+                if (!rhs.get(i).equals(nt)) {
+                    continue;
+                }
+
+                // If we are, consider the sequence of symbols after nt
+                List<Symbol> tail = rhs.subList(i + 1, rhs.size());
+
+                if (!tail.isEmpty()) {
+                    Set<Symbol> firstSet = firstSet(tail);
+                    updateSet.addAll(firstSet);
+                }
+
+                boolean noAugmentedSigma = tail.stream().noneMatch(Symbol::isAugmentedSigma);
+                boolean allToLambda = tail.stream().allMatch(this::derivesToLambda);
+                if (tail.isEmpty() || (noAugmentedSigma && allToLambda)) {
+                    Set<Symbol> follow = followSet(lhs, followSet);
+                    updateSet.addAll(follow);
+                }
+            }
+        }
+
+        return updateSet;
+    }
+
+    Set<Symbol> followSet(Symbol nt) {
+        return followSet(nt, new HashSet<>());
+    }
+
+    Set<Symbol> predictSet(Rule r) {
+        Set<Symbol> answer = firstSet(r.getRight());
+
+        if (derivesToLambda(r.getLeft())) {
+            answer.addAll(followSet(r.getLeft()));
+        }
+
+        return answer;
+    }
+
+    boolean predictSetsDisjoint() {
+        for (Symbol nt : getNonTerminals()) {
+            List<Rule> productions = getProductions(nt);
+            for (int i = 0; i < productions.size(); i++) {
+                for (int j = i + 1; j < productions.size(); j++) {
+                    Rule a = productions.get(i);
+                    Rule b = productions.get(j);
+
+                    if (!Collections.disjoint(predictSet(a), predictSet(b))) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
     //</editor-fold>
+
+    HashMap<Tuple<Symbol, Symbol>, Integer> buildLLParseTable() {
+        // if(!this.predictSetsDisjoint()) {
+        //     System.out.println("Predict sets are not disjoint, cannot construct LL(1) parse table!");
+        //     return new HashMap<Tuple<Symbol, Symbol>, Integer>();
+        // }
+        ArrayList<Tuple<Rule, Set<Symbol>>> predictSets = new ArrayList<Tuple<Rule, Set<Symbol>>>();
+        this.productions().forEach(rule -> {
+            predictSets.add(Tuple.of(rule, this.predictSet(rule)));
+        });
+        HashMap<Tuple<Symbol, Symbol>, Integer> parseTable = new HashMap<Tuple<Symbol, Symbol>, Integer>();
+        for(int i = 0; i < predictSets.size(); ++i) {
+            for(Symbol s : predictSets.get(i).getSecond()) {
+                parseTable.put(Tuple.of(predictSets.get(i).getFirst().getLeft(), s), i + 1);
+            }
+        }
+        ArrayList<Symbol> terms = new ArrayList<>(getTerminals());
+        System.out.print("\t");
+        for(Symbol s : terms) {
+            System.out.print(s + "\t");
+        }
+        System.out.println();
+        for(Symbol nonterm : this.getNonTerminals()) {
+            System.out.print(nonterm + " | \t");
+            for(Symbol term : terms) {
+                Integer val = parseTable.get(Tuple.of(nonterm, term));
+                if(val != null) {
+                    System.out.print(val + " | \t");
+                } else {
+                    System.out.print("# | \t");
+                }
+            }
+            System.out.println();
+        }
+        return parseTable;
+    }
 
     static class Rule {
         private Symbol left;
@@ -170,6 +281,11 @@ class CFG {
 
         boolean isEnd() {
             return right.contains(Symbol.EOF);
+        }
+
+        @Override
+        public String toString() {
+            return left + "->" + right;
         }
 
         @Override
