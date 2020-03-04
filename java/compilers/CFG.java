@@ -208,7 +208,7 @@ class CFG {
     }
     //</editor-fold>
 
-    HashMap<Tuple<Symbol, Symbol>, Integer> buildLLParseTable() {
+    HashMap<Tuple<Symbol, Symbol>, Rule> buildLLParseTable() {
         // if(!this.predictSetsDisjoint()) {
         //     System.out.println("Predict sets are not disjoint, cannot construct LL(1) parse table!");
         //     return new HashMap<Tuple<Symbol, Symbol>, Integer>();
@@ -217,10 +217,12 @@ class CFG {
         this.productions().forEach(rule -> {
             predictSets.add(Tuple.of(rule, this.predictSet(rule)));
         });
-        HashMap<Tuple<Symbol, Symbol>, Integer> parseTable = new HashMap<Tuple<Symbol, Symbol>, Integer>();
-        for(int i = 0; i < predictSets.size(); ++i) {
-            for(Symbol s : predictSets.get(i).getSecond()) {
-                parseTable.put(Tuple.of(predictSets.get(i).getFirst().getLeft(), s), i + 1);
+        HashMap<Tuple<Symbol, Symbol>, Rule> parseTable = new HashMap<Tuple<Symbol, Symbol>, Rule>();
+        for(Tuple<Rule, Set<Symbol>> pred : predictSets) {
+	    Rule rule = pred.getFirst();
+	    Symbol row = rule.getLeft();
+            for(Symbol col : pred.getSecond()) {
+                parseTable.put(Tuple.of(row, col), rule);
             }
         }
         ArrayList<Symbol> terms = new ArrayList<>(getTerminals());
