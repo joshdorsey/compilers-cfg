@@ -225,6 +225,10 @@ class CFG {
                 parseTable.put(Tuple.of(row, col), rule);
             }
         }
+        return parseTable;
+    }
+
+    void printLLParseTable(HashMap<Tuple<Symbol, Symbol>, Rule> table) {
         ArrayList<Symbol> terms = new ArrayList<>(getTerminals());
         System.out.print("\t");
         for(Symbol s : terms) {
@@ -234,7 +238,7 @@ class CFG {
         for(Symbol nonterm : this.getNonTerminals()) {
             System.out.print(nonterm + " | \t");
             for(Symbol term : terms) {
-                Integer val = parseTable.get(Tuple.of(nonterm, term));
+                Rule val = table.get(Tuple.of(nonterm, term));
                 if(val != null) {
                     System.out.print(val + " | \t");
                 } else {
@@ -243,7 +247,6 @@ class CFG {
             }
             System.out.println();
         }
-        return parseTable;
     }
 
     static class Rule {
