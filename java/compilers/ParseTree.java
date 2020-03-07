@@ -10,8 +10,8 @@ import compilers.util.Tuple;
 
 class ParseTree {
 	ParseNode root;
-	static final Symbol MARKER = new Symbol("*");
-	static final Symbol START = new Symbol("S");
+	static final Symbol MARKER = Symbol.of("*");
+	static final Symbol START = Symbol.of("S");
 
 	ParseTree(CFG grammar, Deque<Symbol> input) throws Exception {
 		HashMap<Tuple<Symbol, Symbol>, CFG.Rule> table = grammar.buildLLParseTable();
@@ -33,11 +33,12 @@ class ParseTree {
 				ParseNode node = new ParseNode(s);
 				cur.addChild(node);
 				cur = node;
-			} else if (s.isTerminal() || s == Symbol.EOF || s == Symbol.LAMBDA) {
-				if (s != Symbol.LAMBDA) {
+			} else if (s.isAugmentedSigma() || s == Symbol.LAMBDA) {
+				if (s.isAugmentedSigma()) {
 					if (!s.equals(input.peek()))
 						throw new Exception(input.peek() + ": does not match expected terminal: " + s);
-					input.pop();
+					if (s != Symbol.EOF)
+						input.pop();
 				}
 				cur.addChild(new ParseNode(s));
 			} else if (s == MARKER)

@@ -23,7 +23,7 @@ public class CFGReader {
                     continue;
                 }
                 Symbol[] symbols = stream(line.split("\\s+"))
-                        .map(Symbol::new)
+                        .map(Symbol::of)
                         .filter(s -> s.type != null)
                         .toArray(Symbol[]::new);
 
@@ -69,7 +69,7 @@ public class CFGReader {
 		LinkedList<Symbol> lines = new LinkedList<>();
 		try (Scanner in = new Scanner(new File(args[1]))) {
 			while (in.hasNext())
-				lines.add(new Symbol(in.nextLine().trim()));
+				lines.add(Symbol.of(in.nextLine().trim()));
 		} catch (FileNotFoundException e) {
 			System.out.println(e.getMessage());
 			System.exit(1);

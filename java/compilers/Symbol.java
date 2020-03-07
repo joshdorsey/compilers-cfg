@@ -5,26 +5,48 @@ import java.util.Objects;
 enum SymbolType { NONTERMINAL, TERMINAL, RULE, ALT, EOF, LAMBDA }
 
 class Symbol {
-    static final Symbol LAMBDA = new Symbol("lambda");
-    static final Symbol EOF = new Symbol("$");
+    static final Symbol LAMBDA = new Symbol("lambda", SymbolType.LAMBDA);
+    static final Symbol EOF = new Symbol("$", SymbolType.EOF);
+    private static final Symbol ALT = new Symbol("|", SymbolType.ALT);
+    private static final Symbol RULE = new Symbol("->", SymbolType.RULE);
 
     String token;
     SymbolType type;
 
-    Symbol(String token) {
+    Symbol() {
+	    token = "";
+	    type = null;
+    }
+    
+    private Symbol(String token, SymbolType type) {
         this.token = token;
-        type = matchSymbol(token);
+        this.type = type;
     }
 
-    public boolean isTerminal() {
-        return SymbolType.TERMINAL.equals(type);
+    static Symbol of(String token) {
+        switch (token) {
+            case "->": return RULE;
+            case "|": return ALT;
+            case "$": return EOF;
+            case "lambda": return LAMBDA;
+            default:
+                if (token.matches("[a-z]+"))
+                    return new Symbol(token, SymbolType.TERMINAL);
+                if (token.matches("[A-Z]+"))
+                    return new Symbol(token, SymbolType.NONTERMINAL);
+                return new Symbol(token, null);
+        }
     }
 
-    public boolean isNonTerminal() {
-        return SymbolType.NONTERMINAL.equals(type);
+    boolean isTerminal() {
+        return type == SymbolType.TERMINAL;
     }
 
-    public boolean isAugmentedSigma() {
+    boolean isNonTerminal() {
+        return type == SymbolType.NONTERMINAL;
+    }
+
+    boolean isAugmentedSigma() {
         return equals(EOF) || isTerminal();
     }
 
@@ -33,25 +55,14 @@ class Symbol {
         return token;
     }
 
-    static SymbolType matchSymbol(String token) {
-        switch (token) {
-            case "->": return SymbolType.RULE;
-            case "|": return SymbolType.ALT;
-            case "$": return SymbolType.EOF;
-            case "lambda": return SymbolType.LAMBDA;
-            default:
-                if (token.matches("[a-z]+"))
-                    return SymbolType.TERMINAL;
-                if (token.matches("[A-Z]+"))
-                    return SymbolType.NONTERMINAL;
-                return null;
-        }
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+	if (o == null)
+		return this == EOF;
+        if (o == this)
+		return true;
+        if (o.getClass() != this.getClass())
+		return false;
         Symbol symbol = (Symbol) o;
         return Objects.equals(token, symbol.token) &&
                 type == symbol.type;
