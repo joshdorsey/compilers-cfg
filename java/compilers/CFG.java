@@ -2,6 +2,7 @@ package compilers;
 
 import compilers.util.Tuple;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
+import static org.apache.commons.collections4.SetUtils.hashSet;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -110,7 +111,7 @@ class CFG {
         List<Symbol> rest = seq.subList(1, seq.size());
 
         if (Symbol.EOF.equals(firstSymbol) || getTerminals().contains(firstSymbol)) {
-            return new HashSet<>(Collections.singletonList(firstSymbol));
+            return hashSet(firstSymbol);
         }
 
         Set<Symbol> updateSet = new HashSet<>();
