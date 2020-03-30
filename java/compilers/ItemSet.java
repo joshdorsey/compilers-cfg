@@ -34,6 +34,13 @@ class ItemSet implements Cloneable {
 		return copy;
 	}
 
+	ItemSet goTo(CFG grammar, Symbol symbol) {
+		ItemSet copy = (ItemSet) clone();
+		copy.items.removeIf(i -> !i.next().equals(symbol));
+		copy.items.forEach(i -> i.advance());
+		return copy.closure(grammar);
+	}
+
 	static class Item {
 		private CFG.Rule production;
 		private int marker; // index of the RHS which the marker appears *before*
@@ -55,6 +62,10 @@ class ItemSet implements Cloneable {
 			if (isReducible())
 				return null;
 			return production.getRight().get(marker);
+		}
+
+		void advance() {
+			marker++;
 		}
 
 		@Override
