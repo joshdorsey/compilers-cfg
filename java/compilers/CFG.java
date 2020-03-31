@@ -250,6 +250,21 @@ class CFG {
         }
     }
 
+    List<ItemSet> buildLRItemSets() {
+	    ItemSet initial = new ItemSet(getProductions(Symbol.of("S")));
+	    List<ItemSet> states = new ArrayList<>();
+	    ItemSet.addState(states, initial);
+	    ItemSet.generate(this, states);
+	    return states;
+    }
+
+    void printLRItemSets(List<ItemSet> sets) {
+	    System.out.println("Item Sets");
+	    for (int i = 0; i < sets.size(); i++) {
+		    System.out.println("Item Set " + i + " " + sets.get(i));
+	    }
+    }
+
     static class Rule {
         private Symbol left;
         private List<Symbol> right;

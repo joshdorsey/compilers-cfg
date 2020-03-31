@@ -125,5 +125,7 @@ public class CFGReader {
         System.out.println(grammar.predictSetsDisjoint() ? "Yes." : "No.");
 
         grammar.printLLParseTable(grammar.buildLLParseTable());
+
+	grammar.printLRItemSets(grammar.buildLRItemSets());
     }
 }
