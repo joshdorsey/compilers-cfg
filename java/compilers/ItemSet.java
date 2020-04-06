@@ -68,24 +68,32 @@ class ItemSet implements Cloneable {
 		return copy;
 	}
 
-	private ItemSet goTo(CFG grammar) {
+	private void goTo(CFG grammar, List<ItemSet> states) {
 		ItemSet closed = closure(grammar);
 		Stream.concat(grammar.terminals(), grammar.nonterminals())
-			.forEach(s -> closed.advanceMarkers(s));
-		return closed;
+			.forEach(s -> {
+				ItemSet rel = closed.advanceMarkers(s);
+				if (!rel.items.isEmpty())
+					addState(states, rel);
+			});
 	}
 
-	private void advanceMarkers(Symbol symbol) {
+	private ItemSet advanceMarkers(Symbol symbol) {
+		ItemSet advanced = new ItemSet();
 		for (Item i : items) {
-			if (symbol.equals(i.next()))
-				i.advance();
+			if (symbol.equals(i.next())) {
+				Item copy = (Item) i.clone();
+				copy.advance();
+				advanced.items.add(copy);
+			}
 		}
+		return advanced;
 	}
 
 	static void generate(CFG grammar, List<ItemSet> states) {
 		while (!workList.isEmpty()) {
 			ItemSet state = workList.remove(0);
-			addState(states, state.goTo(grammar));
+			state.goTo(grammar, states);
 		}
 	}
 
