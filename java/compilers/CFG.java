@@ -265,6 +265,14 @@ class CFG {
 	    }
     }
 
+    List<Map<Symbol, Tuple<Character, Integer>>> buildSLRActionTable(List<ItemSet> sets) {
+	    // for incomplete items, add shift action
+	    // for reducible items, add reduce action
+	    // for lambda items, add reduce action
+	    // for finished starting item, make whole row accepting
+	    return null;
+    }
+
     static class Rule {
         private Symbol left;
         private List<Symbol> right;
