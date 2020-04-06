@@ -56,20 +56,14 @@ class ItemSet implements Cloneable {
 	}
 
 	private ItemSet closure(CFG grammar) {
-		ItemSet copy = (ItemSet) clone();
-		boolean changed = true;
-		while (changed) {
+		ItemSet copy = (ItemSet) clone(), prev = null;
+		while (!copy.equals(prev)) {
+			prev = (ItemSet) copy.clone();
 			Set<Item> temp = new LinkedHashSet<>(copy.items);
-			for (Item i : temp) {
-				Symbol s = i.next();
-				if (Symbol.EOF.equals(s) || Symbol.LAMBDA.equals(s)) {
-					changed = false;
-				} else if (s.isNonTerminal()) {
-					changed = copy.items.addAll(grammar.productions(s)
-							.map(r -> new Item(r, 0))
-							.collect(Collectors.toSet()));
-				}
-			}
+			temp.removeIf(i -> i.next() == null || !i.next().isNonTerminal());
+			temp.forEach(i -> copy.items.addAll(grammar.productions(i.next())
+						.map(r -> new Item(r, 0))
+						.collect(Collectors.toSet())));
 		}
 		return copy;
 	}
