@@ -70,12 +70,12 @@ class ItemSet implements Cloneable {
 
 	private void goTo(CFG grammar, List<ItemSet> states) {
 		ItemSet closed = closure(grammar);
-		addState(states, closed);
+		addState(states, closed, true);
 		Stream.concat(grammar.terminals(), grammar.nonterminals())
 			.forEach(s -> {
 				ItemSet rel = closed.advanceMarkers(s);
 				if (!rel.items.isEmpty())
-					addState(states, rel);
+					addState(states, rel.closure(grammar), true);
 			});
 	}
 
@@ -98,9 +98,10 @@ class ItemSet implements Cloneable {
 		}
 	}
 
-	static void addState(List<ItemSet> states, ItemSet state) {
+	static void addState(List<ItemSet> states, ItemSet state, boolean finalState) {
 		if (!states.contains(state)) {
-			states.add(state);
+			if (finalState)
+				states.add(state);
 			workList.add(state);
 		}
 	}

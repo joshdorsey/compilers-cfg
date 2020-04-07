@@ -253,7 +253,7 @@ class CFG {
     List<ItemSet> buildLRItemSets() {
 	    ItemSet initial = new ItemSet(getProductions(Symbol.of("S")));
 	    List<ItemSet> states = new ArrayList<>();
-	    ItemSet.addState(states, initial);
+	    ItemSet.addState(states, initial, false);
 	    ItemSet.generate(this, states);
 	    return states;
     }
