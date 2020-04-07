@@ -60,7 +60,7 @@ class ItemSet implements Cloneable {
 		while (!copy.equals(prev)) {
 			prev = (ItemSet) copy.clone();
 			Set<Item> temp = new LinkedHashSet<>(copy.items);
-			temp.removeIf(i -> i.next() == null || !i.next().isNonTerminal());
+			temp.removeIf(i -> i.isReducible() || !i.next().isNonTerminal());
 			temp.forEach(i -> copy.items.addAll(grammar.productions(i.next())
 						.map(r -> new Item(r, 0))
 						.collect(Collectors.toSet())));
