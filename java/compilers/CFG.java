@@ -265,7 +265,7 @@ class CFG {
 	    }
     }
 
-    List<Map<Symbol, Tuple<Character, Integer>>> buildSLRActionTable(List<ItemSet> sets) {
+    List<Map<Symbol, Action>> buildSLRActionTable(List<ItemSet> sets) {
 	    // for incomplete items, add shift action
 	    // for reducible items, add reduce action
 	    // for lambda items, add reduce action

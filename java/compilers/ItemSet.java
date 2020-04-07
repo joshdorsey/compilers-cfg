@@ -1,16 +1,13 @@
 package compilers;
 
-import java.util.Set;
-import java.util.List;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
-import java.util.Objects;
 
 class ItemSet implements Cloneable {
 	private Set<Item> items;
 	private static List<ItemSet> workList = new LinkedList<>();
+	static List<Map<Symbol, Action>> actionTable = new ArrayList<>();
 
 	ItemSet() {
 		items = new LinkedHashSet<>();
