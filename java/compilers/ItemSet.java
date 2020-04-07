@@ -52,6 +52,12 @@ class ItemSet implements Cloneable {
 		return Objects.hash(items);
 	}
 
+	private boolean isComplete() {
+		if (items.size() != 1)
+			return false;
+		return items.stream().allMatch(Item::isReducible);
+	}
+
 	private ItemSet closure(CFG grammar) {
 		ItemSet copy = (ItemSet) clone(), prev = null;
 		while (!copy.equals(prev)) {
@@ -67,19 +73,23 @@ class ItemSet implements Cloneable {
 
 	private void goTo(CFG grammar, List<ItemSet> states) {
 		ItemSet closed = closure(grammar);
-		addState(states, closed, true);
-		Stream.concat(grammar.terminals(), grammar.nonterminals())
+		final int fromIndex = addState(states, closed, true);
+		Stream.concat(Stream.of(Symbol.EOF),
+				Stream.concat(grammar.terminals(), grammar.nonterminals()))
 			.forEach(s -> {
-				ItemSet rel = closed.advanceMarkers(s);
-				if (!rel.items.isEmpty())
-					addState(states, rel.closure(grammar), true);
+				ItemSet rel = closed.advanceMarkers(s).closure(grammar);
+				if (!rel.items.isEmpty()) {
+					int toIndex = addState(states, rel, true);
+					actionTable.get(fromIndex).put(s,
+						       	new Action.Shift(toIndex));
+				}
 			});
 	}
 
 	private ItemSet advanceMarkers(Symbol symbol) {
 		ItemSet advanced = new ItemSet();
 		for (Item i : items) {
-			if (symbol.equals(i.next()) || Symbol.EOF == i.next()) {
+			if (symbol.equals(i.next())) {
 				Item copy = (Item) i.clone();
 				copy.advance();
 				advanced.items.add(copy);
@@ -95,12 +105,15 @@ class ItemSet implements Cloneable {
 		}
 	}
 
-	static void addState(List<ItemSet> states, ItemSet state, boolean finalState) {
+	static int addState(List<ItemSet> states, ItemSet state, boolean finalState) {
 		if (!states.contains(state)) {
-			if (finalState)
+			if (finalState) {
 				states.add(state);
+				actionTable.add(new HashMap<>());
+			}
 			workList.add(state);
 		}
+		return states.indexOf(state);
 	}
 
 	static class Item implements Cloneable {
