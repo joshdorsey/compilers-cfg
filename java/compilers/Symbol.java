@@ -14,11 +14,6 @@ public class Symbol {
     final String token;
     final SymbolType type;
 
-    Symbol() {
-	    token = "";
-	    type = null;
-    }
-    
     private Symbol(String token, SymbolType type) {
         this.token = token;
         this.type = type;
@@ -40,11 +35,11 @@ public class Symbol {
     }
 
     boolean isTerminal() {
-        return type == SymbolType.TERMINAL;
+        return type.equals(SymbolType.TERMINAL);
     }
 
     boolean isNonTerminal() {
-        return type == SymbolType.NONTERMINAL;
+        return type.equals(SymbolType.NONTERMINAL);
     }
 
     boolean isAugmentedSigma() {
