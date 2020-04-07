@@ -4,9 +4,9 @@ import java.util.Objects;
 
 enum SymbolType { NONTERMINAL, TERMINAL, RULE, ALT, EOF, LAMBDA }
 
-class Symbol {
+public class Symbol {
     static final Symbol LAMBDA = new Symbol("lambda", SymbolType.LAMBDA);
-    static final Symbol EOF = new Symbol("$", SymbolType.EOF);
+    public static final Symbol EOF = new Symbol("$", SymbolType.EOF);
     static final Symbol START = new Symbol("S", SymbolType.NONTERMINAL);
     private static final Symbol ALT = new Symbol("|", SymbolType.ALT);
     private static final Symbol RULE = new Symbol("->", SymbolType.RULE);

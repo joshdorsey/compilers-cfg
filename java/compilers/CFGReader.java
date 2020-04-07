@@ -10,6 +10,8 @@ import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 
 import static java.util.Arrays.stream;
 
+import compilers.util.InputQueue;
+
 public class CFGReader {
     private static CFG readGrammar(File cfg) {
         ArrayListValuedHashMap<Symbol, LinkedList<Symbol>> grammar = new ArrayListValuedHashMap<>();
@@ -66,16 +68,16 @@ public class CFGReader {
         CFG grammar = readGrammar(new File(args[0]));
 
 	if (args.length == 2) {
-		LinkedList<Symbol> lines = new LinkedList<>();
+		InputQueue input = new InputQueue();
 		try (Scanner in = new Scanner(new File(args[1]))) {
 			while (in.hasNext())
-				lines.add(Symbol.of(in.nextLine().trim()));
+				input.offer(Symbol.of(in.nextLine().trim()));
 		} catch (FileNotFoundException e) {
 			System.out.println(e.getMessage());
 			System.exit(1);
 		}
 		try {
-			ParseTree tree = new ParseTree(grammar, lines);
+			ParseTree tree = new ParseTree(grammar, input);
 			System.out.println(tree.root);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());

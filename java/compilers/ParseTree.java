@@ -1,18 +1,13 @@
 package compilers;
 
-import java.util.Deque;
-import java.util.ArrayDeque;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.HashMap;
-
-import compilers.util.Tuple;
+import java.util.*;
+import compilers.util.*;
 
 class ParseTree {
 	ParseNode root;
 	static final Symbol MARKER = Symbol.of("*");
 
-	ParseTree(CFG grammar, Deque<Symbol> input) throws Exception {
+	ParseTree(CFG grammar, InputQueue input) throws Exception {
 		HashMap<Tuple<Symbol, Symbol>, CFG.Rule> table = grammar.buildLLParseTable();
 		root = new ParseNode();
 		ParseNode cur = root;
@@ -37,7 +32,7 @@ class ParseTree {
 					if (!s.equals(input.peek()))
 						throw new Exception(input.peek() + ": does not match expected terminal: " + s);
 					if (s != Symbol.EOF)
-						input.pop();
+						input.poll();
 				}
 				cur.addChild(new ParseNode(s));
 			} else if (s == MARKER)
