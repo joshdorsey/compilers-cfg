@@ -11,14 +11,13 @@ import compilers.util.Tuple;
 class ParseTree {
 	ParseNode root;
 	static final Symbol MARKER = Symbol.of("*");
-	static final Symbol START = Symbol.of("S");
 
 	ParseTree(CFG grammar, Deque<Symbol> input) throws Exception {
 		HashMap<Tuple<Symbol, Symbol>, CFG.Rule> table = grammar.buildLLParseTable();
 		root = new ParseNode();
 		ParseNode cur = root;
 		ArrayDeque<Symbol> symbols = new ArrayDeque<>();
-		symbols.push(START);
+		symbols.push(Symbol.START);
 		while (!symbols.isEmpty()) {
 			Symbol s = symbols.pop();
 			if (s.isNonTerminal()) {

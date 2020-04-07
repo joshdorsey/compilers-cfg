@@ -56,6 +56,15 @@ class CFG {
     Set<Symbol> getNonTerminals() {
         return nonterminals().collect(Collectors.toSet());
     }
+
+    List<Symbol> getSymbolList() {
+	List<Symbol> list = new LinkedList<>();
+	list.addAll(getTerminals());
+	list.add(Symbol.EOF);
+	list.addAll(getNonTerminals());
+	list.remove(Symbol.START);
+	return list;
+    }
     //</editor-fold>
 
     //<editor-fold desc="Algorithms">
@@ -251,7 +260,7 @@ class CFG {
     }
 
     List<ItemSet> buildLRItemSets() {
-	    ItemSet initial = new ItemSet(getProductions(Symbol.of("S")));
+	    ItemSet initial = new ItemSet(getProductions(Symbol.START));
 	    List<ItemSet> states = new ArrayList<>();
 	    ItemSet.addState(states, initial, false);
 	    ItemSet.generate(this, states);
@@ -266,11 +275,7 @@ class CFG {
     }
 
     void printSLRActionTable() {
-	    ArrayList<Symbol> symbols = new ArrayList<>();
-	    symbols.addAll(getTerminals());
-	    symbols.add(Symbol.EOF);
-	    symbols.addAll(getNonTerminals());
-	    symbols.remove(Symbol.of("S"));
+	    List<Symbol> symbols = getSymbolList();
 	    System.out.print("\t");
 	    for (Symbol s : symbols)
 		    System.out.print(s + "\t");

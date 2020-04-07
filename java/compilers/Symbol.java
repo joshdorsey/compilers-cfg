@@ -7,11 +7,12 @@ enum SymbolType { NONTERMINAL, TERMINAL, RULE, ALT, EOF, LAMBDA }
 class Symbol {
     static final Symbol LAMBDA = new Symbol("lambda", SymbolType.LAMBDA);
     static final Symbol EOF = new Symbol("$", SymbolType.EOF);
+    static final Symbol START = new Symbol("S", SymbolType.NONTERMINAL);
     private static final Symbol ALT = new Symbol("|", SymbolType.ALT);
     private static final Symbol RULE = new Symbol("->", SymbolType.RULE);
 
-    String token;
-    SymbolType type;
+    final String token;
+    final SymbolType type;
 
     Symbol() {
 	    token = "";
@@ -58,7 +59,7 @@ class Symbol {
     @Override
     public boolean equals(Object o) {
 	if (o == null)
-		return this == EOF;
+		return false;
         if (o == this)
 		return true;
         if (o.getClass() != this.getClass())

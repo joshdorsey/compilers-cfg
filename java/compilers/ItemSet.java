@@ -61,7 +61,7 @@ class ItemSet implements Cloneable {
 	private boolean isGoal() {
 		if (items.size() != 1)
 			return false;
-		return items.stream().allMatch(i -> i.production.isEnd());
+		return items.stream().allMatch(i -> i.isReducible() && i.production.isEnd());
 	}
 
 	private Set<Symbol> follow(CFG grammar) {
@@ -81,7 +81,7 @@ class ItemSet implements Cloneable {
 		ItemSet copy = (ItemSet) clone(), prev = null;
 		while (!copy.equals(prev)) {
 			prev = (ItemSet) copy.clone();
-			Set<Item> temp = new LinkedHashSet<>(copy.items);
+			Set<Item> temp = new HashSet<>(copy.items);
 			temp.removeIf(i -> i.isReducible() || !i.next().isNonTerminal());
 			temp.forEach(i -> copy.items.addAll(grammar.productions(i.next())
 						.map(r -> new Item(r, 0))
@@ -93,9 +93,7 @@ class ItemSet implements Cloneable {
 	private void goTo(CFG grammar, List<ItemSet> states) {
 		ItemSet closed = closure(grammar);
 		final int fromIndex = addState(states, closed, true);
-		Stream.concat(Stream.of(Symbol.EOF),
-				Stream.concat(grammar.terminals(), grammar.nonterminals()))
-			.forEach(s -> {
+		grammar.getSymbolList().forEach(s -> {
 				ItemSet rel = closed.advanceMarkers(s).closure(grammar);
 				if (!rel.items.isEmpty()) {
 					int toIndex = addState(states, rel, true);
@@ -118,25 +116,21 @@ class ItemSet implements Cloneable {
 	}
 
 	static void generate(CFG grammar, List<ItemSet> states) {
+		ItemSet state;
 		while (!workList.isEmpty()) {
-			ItemSet state = workList.remove(0);
+			state = workList.remove(0);
 			state.goTo(grammar, states);
 		}
 		for (int i = 0; i < states.size(); i++) {
-			ItemSet s = states.get(i);
-			if (s.isGoal()) {
-				CFG.Rule acceptWith = grammar.getProductions(Symbol.of("S")).get(0);
-				for (Symbol t : grammar.getTerminals())
-					actionTable.get(i).put(t,
+			state = states.get(i);
+			if (state.isGoal()) {
+				CFG.Rule acceptWith = grammar.getProductions(Symbol.START).get(0);
+				for (Symbol s : grammar.getSymbolList())
+					actionTable.get(i).put(s,
 							new Action.Reduce(acceptWith, true));
-				actionTable.get(i).put(Symbol.EOF,
-					       	new Action.Reduce(acceptWith, true));
-				for (Symbol n : grammar.getNonTerminals())
-					actionTable.get(i).put(n,
-							new Action.Reduce(acceptWith, true));
-			} else if (s.isComplete()) {
-				CFG.Rule reduceWith = s.reduction();
-				for (Symbol f : s.follow(grammar))
+			} else if (state.isComplete()) {
+				CFG.Rule reduceWith = state.reduction();
+				for (Symbol f : state.follow(grammar))
 					actionTable.get(i).put(f,
 						       	new Action.Reduce(reduceWith, false));
 			}
