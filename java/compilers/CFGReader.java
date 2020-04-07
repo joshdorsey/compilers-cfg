@@ -127,5 +127,6 @@ public class CFGReader {
         grammar.printLLParseTable(grammar.buildLLParseTable());
 
 	grammar.printLRItemSets(grammar.buildLRItemSets());
+	grammar.printSLRActionTable();
     }
 }

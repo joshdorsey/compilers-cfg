@@ -265,12 +265,27 @@ class CFG {
 	    }
     }
 
-    List<Map<Symbol, Action>> buildSLRActionTable(List<ItemSet> sets) {
-	    // for incomplete items, add shift action
-	    // for reducible items, add reduce action
-	    // for lambda items, add reduce action
-	    // for finished starting item, make whole row accepting
-	    return null;
+    void printSLRActionTable() {
+	    ArrayList<Symbol> symbols = new ArrayList<>();
+	    symbols.addAll(getTerminals());
+	    symbols.add(Symbol.EOF);
+	    symbols.addAll(getNonTerminals());
+	    symbols.remove(Symbol.of("S"));
+	    System.out.print("\t");
+	    for (Symbol s : symbols)
+		    System.out.print(s + "\t");
+	    System.out.println();
+	    for (int i = 0; i < ItemSet.actionTable.size(); i++) {
+		    System.out.print(i + " | \t");
+		    for (Symbol s : symbols) {
+			    Action act = ItemSet.actionTable.get(i).get(s);
+			    if (act != null)
+				    System.out.print(act + " | \t");
+			    else
+				    System.out.print("# | \t");
+		    }
+		    System.out.println();
+	    }
     }
 
     static class Rule {
