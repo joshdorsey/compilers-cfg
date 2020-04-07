@@ -58,6 +58,25 @@ class ItemSet implements Cloneable {
 		return items.stream().allMatch(Item::isReducible);
 	}
 
+	private boolean isGoal() {
+		if (items.size() != 1)
+			return false;
+		return items.stream().allMatch(i -> i.production.isEnd());
+	}
+
+	private Set<Symbol> follow(CFG grammar) {
+		Set<Symbol> follows = new HashSet<>();
+		for (Item i : items)
+			follows.addAll(grammar.followSet(i.production.getLeft()));
+		return follows;
+	}
+
+	private CFG.Rule reduction() {
+		for (Item i : items)
+			return i.production;
+		return null;
+	}
+
 	private ItemSet closure(CFG grammar) {
 		ItemSet copy = (ItemSet) clone(), prev = null;
 		while (!copy.equals(prev)) {
@@ -102,6 +121,25 @@ class ItemSet implements Cloneable {
 		while (!workList.isEmpty()) {
 			ItemSet state = workList.remove(0);
 			state.goTo(grammar, states);
+		}
+		for (int i = 0; i < states.size(); i++) {
+			ItemSet s = states.get(i);
+			if (s.isGoal()) {
+				CFG.Rule acceptWith = grammar.getProductions(Symbol.of("S")).get(0);
+				for (Symbol t : grammar.getTerminals())
+					actionTable.get(i).put(t,
+							new Action.Reduce(acceptWith, true));
+				actionTable.get(i).put(Symbol.EOF,
+					       	new Action.Reduce(acceptWith, true));
+				for (Symbol n : grammar.getNonTerminals())
+					actionTable.get(i).put(n,
+							new Action.Reduce(acceptWith, true));
+			} else if (s.isComplete()) {
+				CFG.Rule reduceWith = s.reduction();
+				for (Symbol f : s.follow(grammar))
+					actionTable.get(i).put(f,
+						       	new Action.Reduce(reduceWith, false));
+			}
 		}
 	}
 
