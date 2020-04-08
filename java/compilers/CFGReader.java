@@ -1,16 +1,10 @@
 package compilers;
 
+import compilers.util.InputQueue;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.List;
-import java.util.Scanner;
-import java.util.LinkedList;
-
-import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
-
-import static java.util.Arrays.stream;
-
-import compilers.util.InputQueue;
+import java.util.*;
 
 public class CFGReader {
     private static CFG readGrammar(File cfg) {
@@ -24,7 +18,7 @@ public class CFGReader {
                 if(line.isBlank()) {
                     continue;
                 }
-                Symbol[] symbols = stream(line.split("\\s+"))
+                Symbol[] symbols = Arrays.stream(line.split("\\s+"))
                         .map(Symbol::of)
                         .filter(s -> s.type != null)
                         .toArray(Symbol[]::new);

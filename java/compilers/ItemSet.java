@@ -1,7 +1,6 @@
 package compilers;
 
 import java.util.*;
-import java.util.stream.Stream;
 import java.util.stream.Collectors;
 
 class ItemSet implements Cloneable {

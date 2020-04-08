@@ -1,10 +1,8 @@
 package compilers.util;
 
-import org.apache.commons.collections4.queue.AbstractQueueDecorator;
-
-import java.util.ArrayDeque;
-
 import compilers.Symbol;
+import org.apache.commons.collections4.queue.AbstractQueueDecorator;
+import java.util.ArrayDeque;
 
 public class InputQueue extends AbstractQueueDecorator<Symbol> {
 

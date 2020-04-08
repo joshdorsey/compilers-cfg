@@ -1,7 +1,7 @@
 package compilers;
 
-import java.util.*;
 import compilers.util.*;
+import java.util.*;
 
 class ParseTree {
 	ParseNode root;
