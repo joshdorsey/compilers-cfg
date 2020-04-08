@@ -3,6 +3,7 @@ package compilers;
 import compilers.util.Tuple;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.collections4.SetUtils;
+import org.apache.commons.collections4.list.SetUniqueList;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -261,7 +262,7 @@ class CFG {
 
     List<ItemSet> buildLRItemSets() {
 	    ItemSet initial = new ItemSet(getProductions(Symbol.START));
-	    List<ItemSet> states = new ArrayList<>();
+	    List<ItemSet> states = SetUniqueList.setUniqueList(new ArrayList<>());
 	    ItemSet.addState(states, initial, false);
 	    ItemSet.generate(this, states);
 	    return states;
