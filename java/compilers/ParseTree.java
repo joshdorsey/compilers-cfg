@@ -8,7 +8,7 @@ class ParseTree {
 	private static final Symbol MARKER = Symbol.of("*");
 
 	ParseTree(CFG grammar, InputQueue input) throws Exception {
-		HashMap<Tuple<Symbol, Symbol>, CFG.Rule> table = grammar.buildLLParseTable();
+		Map<Tuple<Symbol, Symbol>, CFG.Rule> table = grammar.buildLLParseTable();
 		root = new ParseNode();
 		ParseNode cur = root;
 		ArrayDeque<Symbol> symbols = new ArrayDeque<>();
