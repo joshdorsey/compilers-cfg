@@ -12,17 +12,15 @@ public class InputQueue extends AbstractQueueDecorator<Symbol> {
 
 	@Override
 	public Symbol peek() {
-		Symbol p = super.peek();
-		if (p == null)
+		if (super.isEmpty())
 			return Symbol.EOF;
-		return p;
+		return super.peek();
 	}
 
 	@Override
 	public Symbol poll() {
-		Symbol p = super.poll();
-		if (p == null)
+		if (super.isEmpty())
 			return Symbol.EOF;
-		return p;
+		return super.poll();
 	}
 }
