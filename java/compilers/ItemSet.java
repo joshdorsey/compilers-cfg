@@ -181,7 +181,8 @@ class ItemSet implements Cloneable {
 		}
 
 		void advance() {
-			marker++;
+			if (!isReducible())
+				marker++;
 		}
 
 		@Override
