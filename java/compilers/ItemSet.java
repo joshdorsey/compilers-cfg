@@ -63,16 +63,20 @@ class ItemSet implements Cloneable {
 		return items.stream().allMatch(i -> i.isReducible() && i.production.isEnd());
 	}
 
-	private Set<Symbol> follow(CFG grammar) {
-		Set<Symbol> follows = new HashSet<>();
-		for (Item i : items)
-			follows.addAll(grammar.followSet(i.production.getLeft()));
-		return follows;
+	private boolean allowsLambda() {
+		return items.stream().anyMatch(i -> i.production.isLambda());
 	}
 
 	private CFG.Rule reduction() {
 		for (Item i : items)
 			return i.production;
+		return null;
+	}
+
+	private CFG.Rule lambdaReduction() {
+		for (Item i : items)
+			if (i.production.isLambda())
+				return i.production;
 		return null;
 	}
 
@@ -122,14 +126,19 @@ class ItemSet implements Cloneable {
 		}
 		for (int i = 0; i < states.size(); i++) {
 			state = states.get(i);
+			CFG.Rule reduceWith;
 			if (state.isGoal()) {
-				CFG.Rule acceptWith = grammar.getProductions(Symbol.START).get(0);
+				// TODO make separate method in CFG to get starting production
+				// also consider verifying that there is only one starting
+				// production in the grammar
+				reduceWith = grammar.getProductions(Symbol.START).get(0);
 				for (Symbol s : grammar.getSymbolList())
 					actionTable.get(i).put(s,
-							new Action.Reduce(acceptWith, true));
-			} else if (state.isComplete()) {
-				CFG.Rule reduceWith = state.reduction();
-				for (Symbol f : state.follow(grammar))
+							new Action.Reduce(reduceWith, true));
+			} else if (state.isComplete() || state.allowsLambda()) {
+				reduceWith = state.allowsLambda() ? state.lambdaReduction() :
+				       	state.reduction();
+				for (Symbol f : grammar.followSet(reduceWith.getLeft()))
 					actionTable.get(i).put(f,
 						       	new Action.Reduce(reduceWith, false));
 			}
