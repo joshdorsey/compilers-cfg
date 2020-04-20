@@ -5,6 +5,7 @@ import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.text.ParseException;
 
 public class CFGReader {
     private static CFG readGrammar(File cfg) {
@@ -71,9 +72,8 @@ public class CFGReader {
 			System.exit(1);
 		}
 		try {
-			ParseTree tree = new ParseTree(grammar, input);
-			System.out.println(tree.root);
-		} catch (Exception e) {
+			System.out.println(ParseTree.topDownParse(grammar, input));
+		} catch (ParseException e) {
 			System.out.println(e.getMessage());
 		}
 		System.exit(0);

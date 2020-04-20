@@ -2,15 +2,16 @@ package compilers;
 
 import compilers.util.*;
 import java.util.*;
+import java.text.ParseException;
 
 class ParseTree {
-	ParseNode root;
 	private static final Symbol MARKER = Symbol.of("*");
 
-	ParseTree(CFG grammar, InputQueue input) throws Exception {
+	private ParseTree() {}
+	
+	static ParseNode topDownParse(CFG grammar, InputQueue input) throws ParseException {
 		Map<Tuple<Symbol, Symbol>, CFG.Rule> table = grammar.buildLLParseTable();
-		root = new ParseNode();
-		ParseNode cur = root;
+		ParseNode root = new ParseNode(), cur = root;
 		ArrayDeque<Symbol> symbols = new ArrayDeque<>();
 		symbols.push(Symbol.START);
 		while (!symbols.isEmpty()) {
@@ -18,7 +19,7 @@ class ParseTree {
 			if (s.isNonTerminal()) {
 				CFG.Rule rule = table.get(Tuple.of(s, input.peek()));
 				if (rule == null)
-					throw new Exception(input.peek() + ": cannot find rule for nonterminal: " + s);
+					throw new ParseException(input.peek() + ": cannot find rule for nonterminal: " + s, 0);
 				symbols.push(MARKER);
 				List<Symbol> rhs = rule.getRight();
 				ListIterator<Symbol> it = rhs.listIterator(rhs.size());
@@ -30,7 +31,7 @@ class ParseTree {
 			} else if (s.isAugmentedSigma() || s.equals(Symbol.LAMBDA)) {
 				if (s.isAugmentedSigma()) {
 					if (!s.equals(input.peek()))
-						throw new Exception(input.peek() + ": does not match expected terminal: " + s);
+						throw new ParseException(input.peek() + ": does not match expected terminal: " + s, 0);
 					if (s != Symbol.EOF)
 						input.poll();
 				}
@@ -38,6 +39,7 @@ class ParseTree {
 			} else if (s == MARKER)
 				cur = cur.getParent();
 		}
+		return root;
 	}
 
 	static class ParseNode {

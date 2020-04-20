@@ -35,11 +35,11 @@ public class Symbol {
     }
 
     boolean isTerminal() {
-        return type.equals(SymbolType.TERMINAL);
+        return SymbolType.TERMINAL.equals(type);
     }
 
     boolean isNonTerminal() {
-        return type.equals(SymbolType.NONTERMINAL);
+        return SymbolType.NONTERMINAL.equals(type);
     }
 
     boolean isAugmentedSigma() {
