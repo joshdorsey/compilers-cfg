@@ -13,13 +13,14 @@ public class Symbol {
 
     final String token;
     final SymbolType type;
+    private String data;
 
     private Symbol(String token, SymbolType type) {
         this.token = token;
         this.type = type;
     }
 
-    static Symbol of(String token) {
+    public static Symbol of(String token) {
         switch (token) {
             case "->": return RULE;
             case "|": return ALT;
@@ -32,6 +33,22 @@ public class Symbol {
                     return new Symbol(token, SymbolType.NONTERMINAL);
                 return new Symbol(token, null);
         }
+    }
+
+    public static Symbol of(String line, int dataIndex) {
+	    String token, data;
+	    if (dataIndex != -1) {
+		    token = line.substring(0, dataIndex);
+		    data = token.substring(dataIndex);
+	    } else {
+		    token = line;
+		    data = null;
+	    }
+	    if (!token.matches("[a-z]+"))
+		    throw new IllegalArgumentException("Token stream must contain only terminals");
+	    Symbol s = new Symbol(token, SymbolType.TERMINAL);
+	    s.data = data;
+	    return s;
     }
 
     boolean isTerminal() {

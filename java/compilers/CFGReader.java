@@ -63,18 +63,12 @@ public class CFGReader {
         CFG grammar = readGrammar(new File(args[0]));
 
 	if (args.length == 2) {
-		InputQueue input = new InputQueue();
 		try (Scanner in = new Scanner(new File(args[1]))) {
-			while (in.hasNext())
-				input.offer(Symbol.of(in.nextLine().trim()));
-		} catch (FileNotFoundException e) {
+			InputQueue input = new InputQueue(in.useDelimiter("\\n").tokens());
+			System.out.println(ParseTree.topDownParse(grammar, input));
+		} catch (FileNotFoundException | ParseException e) {
 			System.out.println(e.getMessage());
 			System.exit(1);
-		}
-		try {
-			System.out.println(ParseTree.topDownParse(grammar, input));
-		} catch (ParseException e) {
-			System.out.println(e.getMessage());
 		}
 		System.exit(0);
 	}
