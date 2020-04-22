@@ -16,6 +16,10 @@ public class InputQueue extends AbstractQueueDecorator<Symbol> {
 		inputStream.forEach(t -> super.offer(Symbol.of(t, t.indexOf(' '))));
 	}
 
+	public InputQueue(InputQueue queue) {
+		super(new ArrayDeque<>(queue));
+	}
+
 	@Override
 	public Symbol peek() {
 		if (super.isEmpty())

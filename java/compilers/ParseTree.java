@@ -42,6 +42,44 @@ class ParseTree {
 		return root;
 	}
 
+	static ParseNode bottomUpParse(CFG grammar, InputQueue input) throws ParseException {
+		grammar.buildLRItemSets();
+		Deque<ParseNode> parseQueue = convertTokens(input);
+		Deque<Tuple<Integer, ParseNode>> parseStack = new ArrayDeque<>();
+		parseStack.push(Tuple.of(0, new ParseNode()));
+		while (!parseQueue.isEmpty()) {
+			ParseNode next = parseQueue.peek();
+			Action act = ItemSet.actionTable.get(parseStack.peek().getFirst()).get(next.identifier);
+			if (act == null)
+				throw new ParseException("No suitable action for token: " + next.identifier, 0);
+			if (act instanceof Action.Shift) {
+				parseStack.push(Tuple.of(((Action.Shift)act).getStateNum(), next));
+				if (!next.identifier.equals(Symbol.EOF))
+					parseQueue.pop();
+			} else if (act instanceof Action.Reduce) {
+				if (act.isAccepting()) {
+					ParseNode root = new ParseNode(Symbol.START);
+					Iterator<Tuple<Integer, ParseNode>> remaining = parseStack.descendingIterator();
+					while (remaining.hasNext())
+						root.addChild(remaining.next().getSecond());
+					return root;
+				}
+				ParseNode reduced = new ParseNode(((Action.Reduce)act).getRule().getLeft());
+				reduced.addChild(parseStack.pop().getSecond());
+				parseQueue.push(reduced);
+			}
+		}
+		throw new ParseException("Parse terminated without reaching accepting state", 0);
+	}
+
+	private static Deque<ParseNode> convertTokens(InputQueue tokens) {
+		Deque<ParseNode> converted = new ArrayDeque<>(tokens.size());
+		for (Symbol s : tokens)
+			converted.offer(new ParseNode(s));
+		converted.offer(new ParseNode(Symbol.EOF));
+		return converted;
+	}
+
 	static class ParseNode {
 		private Symbol identifier;
 		private ParseNode parent;

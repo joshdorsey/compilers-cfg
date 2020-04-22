@@ -65,7 +65,10 @@ public class CFGReader {
 	if (args.length == 2) {
 		try (Scanner in = new Scanner(new File(args[1]))) {
 			InputQueue input = new InputQueue(in.useDelimiter("\\n").tokens());
+			InputQueue input2 = new InputQueue(input);
 			System.out.println(ParseTree.topDownParse(grammar, input));
+			System.out.println();
+			System.out.println(ParseTree.bottomUpParse(grammar, input2));
 		} catch (FileNotFoundException | ParseException e) {
 			System.out.println(e.getMessage());
 			System.exit(1);
