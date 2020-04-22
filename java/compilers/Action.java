@@ -11,8 +11,6 @@ abstract class Action {
 		return accepting;
 	}
 
-	abstract void doAction();
-
 	static class Shift extends Action {
 		private int stateNum;
 
@@ -21,8 +19,9 @@ abstract class Action {
 			stateNum = goToState;
 		}
 
-		@Override
-		void doAction() {}
+		int getStateNum() {
+			return stateNum;
+		}
 
 		@Override
 		public String toString() {
@@ -38,12 +37,13 @@ abstract class Action {
 			rule = reduceWith;
 		}
 
-		@Override
-		void doAction() {}
+		CFG.Rule getRule() {
+			return rule;
+		}
 
 		@Override
 		public String toString() {
-			return "r-" + rule;
+			return "r-" + rule + (isAccepting() ? " (accept)" : "");
 		}
 	}
 }
